@@ -15,14 +15,6 @@ from app.utils.auth_utils import (
 router = APIRouter()
 
 
-@router.get("/test")
-async def test_route():
-
-    return {
-        "message": "Test route works"
-    }
-
-
 @router.post("/signup")
 async def signup(
         name: str,
@@ -35,6 +27,7 @@ async def signup(
     )
 
     if existing_user:
+
         return {
             "message": "User already exists"
         }
@@ -65,6 +58,7 @@ async def login(
     )
 
     if not user:
+
         return {
             "message": "User not found"
         }
@@ -75,6 +69,7 @@ async def login(
     )
 
     if not password_correct:
+
         return {
             "message": "Incorrect password"
         }

@@ -1,20 +1,16 @@
+from jose import jwt
 from datetime import datetime, timedelta, UTC
 
-from jose import JWTError, jwt
-
-from fastapi import Depends, HTTPException, status
-
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 
 from app.models.user_model import User
 
-
-SECRET_KEY = "smartstudybuddysecret"
+SECRET_KEY = "mysupersecretkey"
 
 ALGORITHM = "HS256"
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="login"
@@ -46,11 +42,6 @@ async def get_current_user(
         token: str = Depends(oauth2_scheme)
 ):
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials"
-    )
-
     try:
 
         payload = jwt.decode(
@@ -62,16 +53,28 @@ async def get_current_user(
         email = payload.get("sub")
 
         if email is None:
-            raise credentials_exception
 
-    except JWTError:
-        raise credentials_exception
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid token"
+            )
 
-    user = await User.find_one(
-        User.email == email
-    )
+        user = await User.find_one(
+            User.email == email
+        )
 
-    if user is None:
-        raise credentials_exception
+        if user is None:
 
-    return user
+            raise HTTPException(
+                status_code=401,
+                detail="User not found"
+            )
+
+        return user
+
+    except:
+
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+        )
